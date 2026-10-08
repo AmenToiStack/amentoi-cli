@@ -20,7 +20,7 @@ The shared key can omit an expiry, but remains revocable. The CLI exchanges it t
 | Resource | Commands |
 | --- | --- |
 | `pages` | `list`, `get`, `create`, `update`, `publish`, `stats` |
-| `blocks` | `create`, `update`, `delete`, `window`, `image`, `thumbnail` |
+| `blocks` | `create`, `update`, `subtitle`, `delete`, `window`, `image`, `thumbnail` |
 | `forms` | `list`, `get`, `create`, `update`, `publish`, `stats` |
 | `submissions` | `list`, `get` |
 | `people` | `list`, `get`, `create`, `update`, `archive`, `restore`, `overview`, `stats` |
@@ -33,7 +33,8 @@ Examples:
 ```bash
 amentoi-cli pages list --json
 amentoi-cli pages create --slug mon-profil --title 'Mon profil' --json
-amentoi-cli blocks create PAGE_ID --type LINK --data '{"url":"https://example.com","label":"Site"}' --json
+amentoi-cli blocks create PAGE_ID --type LINK --data '{"url":"https://example.com","label":"Site"}' --subtitle '45 min' --json
+amentoi-cli blocks subtitle PAGE_ID BLOCK_ID 'Inscriptions until 12 October' --json   # or --clear
 amentoi-cli pages stats PAGE_ID --days 30 --json
 amentoi-cli forms create --file form.json --json
 amentoi-cli submissions list FORM_ID --json
