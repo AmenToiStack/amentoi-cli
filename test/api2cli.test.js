@@ -104,3 +104,65 @@ test('one account key selects two workspaces and three product services', async 
     product.instance.close()
   }
 })
+async function tokenServer() {
+  return server((request, response) => {
+    response.setHeader('content-type', 'application/json')
+    response.end(JSON.stringify({ data: { token: 'short-product-token' } }))
+  })
+}
+
+test('blocks subtitle keeps the rest of the config and drops the read-only fields', async () => {
+  const requests = []
+  const core = await tokenServer()
+  const link = await server(async (request, response) => {
+    let body = ''
+    for await (const chunk of request) body += chunk
+    requests.push({ method: request.method, path: request.url, body: body === '' ? null : JSON.parse(body) })
+    response.setHeader('content-type', 'application/json')
+    response.end(JSON.stringify(request.method === 'GET'
+      ? { data: { id: 'page-1', blocks: [{ id: 'block-1', type: 'FORM', config: { label: 'Inscription', url: 'https://forms.example/f/1', highlight: true, formStatus: 'OPEN' } }] } }
+      : { data: { id: 'block-1' } }))
+  })
+  try {
+    const env = { AMENTOI_API_KEY: key, AMENTOI_CORE_URL: core.url, AMENTOI_LINK_URL: link.url }
+    const set = await run(['blocks', 'subtitle', 'page-1', 'block-1', '  Jusqu au 12 octobre  ', '--json'], env)
+    assert.equal(set.code, 0, set.stderr)
+    const cleared = await run(['blocks', 'subtitle', 'page-1', 'block-1', '--clear', '--json'], env)
+    assert.equal(cleared.code, 0, cleared.stderr)
+    const patches = requests.filter((entry) => entry.method === 'PATCH')
+    assert.deepEqual(patches.map((entry) => entry.path), ['/v1/link/pages/page-1/blocks/block-1', '/v1/link/pages/page-1/blocks/block-1'])
+    assert.deepEqual(patches[0].body, { config: { label: 'Inscription', url: 'https://forms.example/f/1', highlight: true, subtitle: 'Jusqu au 12 octobre' } })
+    assert.equal(patches[1].body.config.subtitle, null)
+
+    const neither = await run(['blocks', 'subtitle', 'page-1', 'block-1', '--json'], env)
+    assert.notEqual(neither.code, 0)
+    const missing = await run(['blocks', 'subtitle', 'page-1', 'block-9', 'x', '--json'], env)
+    assert.notEqual(missing.code, 0)
+    assert.equal(requests.filter((entry) => entry.method === 'PATCH').length, 2)
+  } finally {
+    core.instance.close()
+    link.instance.close()
+  }
+})
+
+test('blocks create --subtitle merges it into the config', async () => {
+  const bodies = []
+  const core = await tokenServer()
+  const link = await server(async (request, response) => {
+    let body = ''
+    for await (const chunk of request) body += chunk
+    bodies.push(JSON.parse(body))
+    response.setHeader('content-type', 'application/json')
+    response.end(JSON.stringify({ data: { id: 'block-1' } }))
+  })
+  try {
+    const result = await run(['blocks', 'create', 'page-1', '--type', 'LINK', '--data', '{"label":"Podcast","url":"https://example.com"}', '--subtitle', '45 min', '--json'], {
+      AMENTOI_API_KEY: key, AMENTOI_CORE_URL: core.url, AMENTOI_LINK_URL: link.url,
+    })
+    assert.equal(result.code, 0, result.stderr)
+    assert.deepEqual(bodies, [{ type: 'LINK', config: { label: 'Podcast', url: 'https://example.com', subtitle: '45 min' } }])
+  } finally {
+    core.instance.close()
+    link.instance.close()
+  }
+})

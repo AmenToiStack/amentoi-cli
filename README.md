@@ -36,7 +36,8 @@ Core has key-session routes for Link, Forms, and People. Songs and Liturgy do no
 amentoi-cli pages list --json
 amentoi-cli pages create --slug mon-profil --title 'Mon profil' --json
 amentoi-cli pages get PAGE_ID --json
-amentoi-cli blocks create PAGE_ID --type LINK --data '{"url":"https://example.com","label":"Site"}' --json
+amentoi-cli blocks create PAGE_ID --type LINK --data '{"url":"https://example.com","label":"Site"}' --subtitle '45 min' --json
+amentoi-cli blocks subtitle PAGE_ID BLOCK_ID 'Inscriptions until 12 October' --json   # or --clear
 amentoi-cli blocks window PAGE_ID BLOCK_ID --from 2026-10-01T09:00:00Z --until null --json
 amentoi-cli blocks image PAGE_ID --url https://example.com/image.png --output preview.webp --json
 amentoi-cli blocks thumbnail PAGE_ID BLOCK_ID --file preview.webp --json
