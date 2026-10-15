@@ -46,3 +46,13 @@ peopleResource.command('stats').description('Read People growth statistics')
   .option('--days <n>', 'Number of days').option('--json', 'Output as JSON')
   .action((opts: DataOptions & { days?: string }) =>
     run(() => people.get('/v1/people/stats/growth', { days: opts.days }), opts))
+
+peopleResource.command('mail-status').description('Read the sync state of the Forms and Mail connections')
+  .option('--json', 'Output as JSON')
+  .addHelpText('after', '\nReturns mail.state (ACTIVE or NOT_CONNECTED), lastSyncAt, lastSyncCount, pending, and the forms receipts.\nExample: amentoi-cli people mail-status --json')
+  .action((opts: DataOptions) => run(() => people.get('/v1/integrations/connections'), opts))
+
+peopleResource.command('mail-resync').description('Replay the whole directory to Amen Mail (needs people.export.write; refused while Mail is not connected)')
+  .option('--json', 'Output as JSON')
+  .addHelpText('after', '\nConnecting People to Mail needs a user session: see amentoi-cli connections --help.\nExample: amentoi-cli people mail-resync --json')
+  .action((opts: DataOptions) => run(() => people.post('/v1/integrations/mail/resync'), opts))

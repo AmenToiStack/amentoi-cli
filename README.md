@@ -28,7 +28,7 @@ Create an account-wide key in Amen Link API key settings with the service scopes
 
 Production URLs for Core, Link, Forms, and People are configured by default. For staging, local development, or another Core-supported product, use `amentoi-cli config set <service> <url>` or `AMENTOI_<SERVICE>_URL`. `api call` can then reach its existing `/v1` routes through a Core product session. The CLI checks `AMENTOI_API_KEY` first, then `~/.config/tokens/amentoi-cli.txt` (mode 0600), then the previous `~/.config/amentoi/cli.json` key. An old key in `AMENTOI_API_KEY` takes precedence over one saved with `auth set`.
 
-Core has key-session routes for Link, Forms, and People. Songs and Liturgy do not yet have key-session routes. Product availability also depends on the selected workspace type; for example, Forms may not be available in a Personal workspace.
+Core has key-session routes for Link, Forms, and People, and for any product named in its `PRODUCT_API_RESOURCES`: Amen Mail works that way once Core lists `mail` and you run `amentoi-cli config set mail <https-url>` (no built-in origin). Songs and Liturgy do not yet have key-session routes. Product availability also depends on the selected workspace type; for example, Forms may not be available in a Personal workspace.
 
 ## Commands
 
@@ -46,6 +46,18 @@ amentoi-cli forms create --file form.json --json
 amentoi-cli forms publish FORM_ID --json
 amentoi-cli submissions list FORM_ID --limit 50 --json
 amentoi-cli forms stats --json
+amentoi-cli forms create --file form.json --respondent-tags membre,2026 --json
+amentoi-cli forms update FORM_ID --no-send-to-people --json
+amentoi-cli people mail-status --json
+amentoi-cli people mail-resync --json
+amentoi-cli mail tags list --json
+amentoi-cli mail contacts list --origin PEOPLE_SYNC --basis CONSENT --tags TAG_ID --json
+amentoi-cli mail segments list --json
+amentoi-cli mail campaigns list --view sent --json
+amentoi-cli mail campaigns report CAMPAIGN_ID --json
+amentoi-cli mail sources --json
+AMENTOI_USER_TOKEN=... amentoi-cli --workspace ORG_ID connections connect people mail --json
+AMENTOI_USER_TOKEN=... amentoi-cli --workspace ORG_ID connections list --json
 amentoi-cli --workspace ORG_ID people list --query Pierre --json
 amentoi-cli --workspace ORG_ID people overview --json
 amentoi-cli --workspace ORG_ID people stats --days 30 --json
@@ -53,6 +65,14 @@ amentoi-cli tools list people --json
 amentoi-cli api call link GET /v1/link/pages --json
 amentoi-cli --workspace ORG_ID api download people GET /v1/people/export.csv --output people.csv --json
 ```
+
+**Forms and People.** Forms send respondents to People by default. `--send-to-people` / `--no-send-to-people` and `--respondent-tags a,b` (at most 20; `''` clears) write `settings.people`; `forms update` reads and merges the current settings because Forms replaces them as a whole. `forms get` shows a `people` block.
+
+**Amen Mail** commands are read-only and need `mail.audience.read`, `mail.segment.read` or `mail.campaign.read`. `mail contacts list --tags` takes tag IDs from `mail tags list`. `mail sources` is `null` outside the Mail audience workspace.
+
+**Needs a signed-in user, not an API key.** `connections list|connect|disconnect|resync` call Core routes that require a user with `core.product.install` (both sides to connect; either side to disconnect or resync). Core refuses API keys there. The CLI has no sign-in flow: export `AMENTOI_USER_TOKEN` (an Amen Identity access token); without it the command fails locally and sends nothing. `people mail-resync` is the key-capable way to replay the directory to Mail (needs `people.export.write`).
+
+**Never offered.** `mail.integration.write` (People to Mail relay) and `people.optout.write` (Mail to People opt-out) are forbidden to API keys by Core, so the CLI has no command for them.
 
 `form.json` is the full API body with `name`, `slug`, and `schema`. `api call` supports JSON endpoints and `--idempotency-key`; `api download` and `api upload` cover binary endpoints. Run `amentoi-cli <resource> <action> --help` for each action's flags and examples.
 
