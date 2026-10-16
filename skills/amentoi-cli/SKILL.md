@@ -9,7 +9,7 @@ Use `amentoi-cli` when the user asks to manage Amen Toi content or read its stat
 
 ## Setup
 
-Install Bun, then install the release or run `npx api2cli install t0piCyb/amentoi-cli`. Production Core, Link, Forms, and People API origins are built in; override them with `amentoi-cli config set <service> <https-url>` for staging. Amen Mail has no built-in origin: run `amentoi-cli config set mail <https-url>` (or set `AMENTOI_MAIL_URL`), and Core must list `mail` in `PRODUCT_API_RESOURCES` or its key exchange answers 404. Another product can be configured by its Core product key and reached through `api call` when Core exposes a key-session audience for it.
+Install Bun, then install the release or run `npx api2cli install AmenToiStack/amentoi-cli`. Production Core, Link, Forms, People, and Mail API origins are built in; override them with `amentoi-cli config set <service> <https-url>` for staging. Amen Mail's production origin is `https://mail.amentoi.com`; for staging use `amentoi-cli config set mail https://mail.dev.amentoi.com` or `AMENTOI_MAIL_URL`. Another product can be configured by its Core product key and reached through `api call` when Core exposes a key-session audience for it.
 
 Create an account-wide key in the Amen Link API key settings with the needed Link, Forms, People and Mail read/write scopes. Pipe it to `amentoi-cli auth set` or set `AMENTOI_API_KEY`. Never print the key or pass it as a command argument in a shared shell. Run `amentoi-cli auth test --json`, then `amentoi-cli workspaces list --json` and `amentoi-cli workspaces use <id-or-slug>`. Use `--workspace ID` for a one-command override. An old `AMENTOI_API_KEY` environment variable takes precedence over a saved key.
 

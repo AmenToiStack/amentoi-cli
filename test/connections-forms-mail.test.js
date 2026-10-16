@@ -268,15 +268,17 @@ test('mail read commands use the mail key session and the exact routes', async (
   } finally { s.close() }
 })
 
-test('mail has no built-in origin and says how to configure it', async () => {
-  const s = await stack()
+test('mail has a built-in production origin and needs no config', async () => {
+  const core = await server((_request, response) => {
+    response.writeHead(404, { 'content-type': 'application/json' })
+    response.end(JSON.stringify({ error: { code: 'NOT_FOUND', message: 'not found' } }))
+  })
   try {
-    const { AMENTOI_MAIL_URL: _unused, ...env } = s.env
-    const result = await run(['mail', 'tags', 'list', '--json'], env)
+    const result = await run(['mail', 'tags', 'list', '--json'], { AMENTOI_API_KEY: key, AMENTOI_CORE_URL: core.url })
     assert.equal(result.code, 1)
-    assert.match(JSON.parse(result.stderr).error.message, /Configure mail: amentoi-cli config set mail/)
-    assert.deepEqual(s.productRequests(), [])
-  } finally { s.close() }
+    assert.doesNotMatch(result.stderr, /Configure mail/)
+    assert.equal(JSON.parse(result.stderr).error.code, 404)
+  } finally { core.instance.close() }
 })
 
 test('Core refusing the mail key session is reported, not hidden', async () => {

@@ -13,6 +13,7 @@ const PRODUCTION_URLS: Record<string, string> = {
   link: 'https://link-api.amentoi.com',
   forms: 'https://forms-api.amentoi.com',
   people: 'https://people-api.amentoi.com',
+  mail: 'https://mail.amentoi.com',
 }
 
 export const globalFlags = {
