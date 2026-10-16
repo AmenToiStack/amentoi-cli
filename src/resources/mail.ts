@@ -3,11 +3,11 @@ import { clientFor } from '../lib/client.js'
 import { id, run, type DataOptions } from '../lib/cli.js'
 
 const mail = clientFor('mail')
-export const mailResource = new Command('mail').description('Read Amen Mail (contacts, tags, segments, campaigns). Read-only; set the origin with config set mail <url>')
+export const mailResource = new Command('mail').description('Read Amen Mail (contacts, tags, segments, campaigns). Read-only')
   .addHelpText('after', `
 Read-only. Each command needs the matching mail.*.read permission on the key (mail.audience.read, mail.segment.read, mail.campaign.read).
 Sending, editing and the People relay are not offered: mail.integration.write is forbidden to API keys.
-Core must list "mail" in PRODUCT_API_RESOURCES for the key exchange to work; Amen Mail has no built-in origin, so run: amentoi-cli config set mail https://MAIL-API-ORIGIN`)
+Production origin https://mail.amentoi.com is built in; override it with amentoi-cli config set mail <url> (staging: https://mail.dev.amentoi.com)`)
 
 interface ContactListOptions extends DataOptions {
   q?: string; status?: string; purpose?: string; tags?: string; tagMode?: string; excludeTag?: string

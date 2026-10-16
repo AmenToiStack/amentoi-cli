@@ -7,11 +7,11 @@ An [api2cli](https://api2cli.dev/docs/create-cli) scaffold adapted for the Amen 
 [Bun](https://bun.sh/) is required for the api2cli binary. Download the release package:
 
 ```bash
-npm install -g https://github.com/t0piCyb/amentoi-cli/releases/download/v0.3.0/amentoi-cli-0.3.0.tgz
+npm install -g https://github.com/AmenToiStack/amentoi-cli/releases/download/v0.4.0/amentoi-cli-0.4.0.tgz
 amentoi-cli --help
 ```
 
-The repository also has `skills/amentoi-cli/SKILL.md` for agents and can be installed by `npx api2cli install t0piCyb/amentoi-cli` once the repository is published.
+The repository also has `skills/amentoi-cli/SKILL.md` for agents and can be installed by `npx api2cli install AmenToiStack/amentoi-cli` once the repository is published.
 
 ## Configure
 
@@ -26,9 +26,9 @@ amentoi-cli --workspace OTHER_WORKSPACE_ID forms list --json
 
 Create an account-wide key in Amen Link API key settings with the service scopes you need. The key grants only workspaces where you may manage API keys, and each request uses the intersection of the key's scopes, its creation-time grant, your current workspace rights, and product installation and entitlements. Select a workspace with `workspaces use` or override it with `--workspace ID` or `AMENTOI_WORKSPACE_ID`. Existing workspace-only keys remain restricted to their original workspace. If `expiresAt` is omitted at creation, the key does not expire automatically; it can still be revoked or rotated. Five-minute service tokens are never saved.
 
-Production URLs for Core, Link, Forms, and People are configured by default. For staging, local development, or another Core-supported product, use `amentoi-cli config set <service> <url>` or `AMENTOI_<SERVICE>_URL`. `api call` can then reach its existing `/v1` routes through a Core product session. The CLI checks `AMENTOI_API_KEY` first, then `~/.config/tokens/amentoi-cli.txt` (mode 0600), then the previous `~/.config/amentoi/cli.json` key. An old key in `AMENTOI_API_KEY` takes precedence over one saved with `auth set`.
+Production URLs for Core, Link, Forms, People, and Mail are configured by default. For staging, local development, or another Core-supported product, use `amentoi-cli config set <service> <url>` or `AMENTOI_<SERVICE>_URL`. `api call` can then reach its existing `/v1` routes through a Core product session. The CLI checks `AMENTOI_API_KEY` first, then `~/.config/tokens/amentoi-cli.txt` (mode 0600), then the previous `~/.config/amentoi/cli.json` key. An old key in `AMENTOI_API_KEY` takes precedence over one saved with `auth set`.
 
-Core has key-session routes for Link, Forms, and People, and for any product named in its `PRODUCT_API_RESOURCES`: Amen Mail works that way once Core lists `mail` and you run `amentoi-cli config set mail <https-url>` (no built-in origin). Songs and Liturgy do not yet have key-session routes. Product availability also depends on the selected workspace type; for example, Forms may not be available in a Personal workspace.
+Core has key-session routes for Link, Forms, and People, and for any product named in its `PRODUCT_API_RESOURCES`: Amen Mail works that way (production origin `https://mail.amentoi.com` built in). Songs and Liturgy do not yet have key-session routes. Product availability also depends on the selected workspace type; for example, Forms may not be available in a Personal workspace.
 
 ## Commands
 
