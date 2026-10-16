@@ -5,7 +5,7 @@ import { readFileSync, writeFileSync, mkdirSync, chmodSync } from 'node:fs'
 export const APP_CLI = 'amentoi-cli'
 export const TOKEN_PATH = join(homedir(), '.config', 'tokens', 'amentoi-cli.txt')
 export const LEGACY_CONFIG_PATH = process.env.AMENTOI_CONFIG ?? join(homedir(), '.config', 'amentoi', 'cli.json')
-export const SERVICE_NAMES = ['core', 'link', 'forms', 'people'] as const
+export const SERVICE_NAMES = ['core', 'link', 'forms', 'people', 'mail'] as const
 export type Service = string
 export const isServiceName = (name: string): boolean => /^[a-z][a-z0-9]{2,23}$/.test(name) && !['identity', 'billing'].includes(name)
 const PRODUCTION_URLS: Record<string, string> = {

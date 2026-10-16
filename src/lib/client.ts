@@ -41,6 +41,26 @@ export async function request(service: Service, method: Method, path: string, bo
   })
 }
 
+export const USER_TOKEN_ENV = 'AMENTOI_USER_TOKEN'
+
+/**
+ * Core routes that act for a signed-in person (product connections) accept a user bearer token and
+ * refuse API keys. The CLI has no sign-in flow: it reads a user access token from the environment.
+ * The token is sent only to Core and is never printed.
+ */
+export async function userRequest(method: Method, path: string, body?: Body): Promise<unknown> {
+  const token = process.env[USER_TOKEN_ENV]?.trim()
+  if (!token) {
+    throw new CliError(401, 'This command needs a signed-in user session; a workspace API key cannot call it.',
+      `Set ${USER_TOKEN_ENV} to the Amen Identity access token of a user allowed to install products, or use the console.`)
+  }
+  const headers: Record<string, string> = { Authorization: `Bearer ${token}` }
+  if (body !== undefined) headers['Content-Type'] = 'application/json'
+  return fetchJson(endpoint(serviceUrl('core'), path), {
+    method, headers, ...(body === undefined ? {} : { body: JSON.stringify(body) }),
+  })
+}
+
 export function clientFor(service: Service) {
   return {
     get: (path: string, query?: Record<string, string | undefined>) => request(service, 'GET', path, undefined, query),
