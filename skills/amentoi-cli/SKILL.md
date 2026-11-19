@@ -15,6 +15,10 @@ Create an account-wide key in the Amen Link API key settings with the needed Lin
 
 The shared key can omit an expiry, but remains revocable. The CLI exchanges it through Core for a five-minute product token bound to the selected workspace. Access requires an active membership, a creation-time grant, the requested scope, and product installation and entitlement. Do not retry denied actions with a different user's credentials.
 
+### Is the CLI up to date?
+
+Run `amentoi-cli version --json` at the start of a session. `data.updateAvailable: true` means a newer release exists: tell the user, and give them `data.command` to run (it reinstalls the CLI and this skill). Do not run it yourself without their go-ahead. Once a day the CLI also prints `amentoi-cli X is available (you have Y). Update: ...` on stderr; relay that line to the user too. A command missing from `--help` (for example `mail campaigns test`) usually means an old version: check `version` before concluding the feature does not exist. `AMENTOI_NO_UPDATE_CHECK=1` turns the daily check off.
+
 ## Resources
 
 | Resource | Commands |

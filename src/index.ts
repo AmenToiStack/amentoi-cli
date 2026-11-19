@@ -13,11 +13,13 @@ import { workspacesResource } from './resources/workspaces.js'
 import { peopleResource } from './resources/people.js'
 import { connectionsResource } from './resources/connections.js'
 import { mailResource } from './resources/mail.js'
+import { run } from './lib/cli.js'
+import { checkNow, startPassiveCheck, VERSION } from './lib/update.js'
 
 const program = new Command()
 program.name('amentoi-cli')
   .description('Amen Toi services with one API key, limited by workspace permissions and product rights')
-  .version('0.5.0')
+  .version(VERSION)
   .option('--json', 'JSON envelope for agents')
   .option('--format <fmt>', 'text, json, csv, or yaml', 'text')
   .option('--verbose', 'Show debug diagnostics')
@@ -33,6 +35,21 @@ program.name('amentoi-cli')
     globalFlags.noHeader = opts.header === false
     globalFlags.workspace = opts.workspace
   })
+
+program.command('version').description('Show this version, the latest release, and whether to update')
+  .option('--json', 'Output as JSON')
+  .addHelpText('after', '\nExample: amentoi-cli version --json\ndata.updateAvailable says whether to update; data.command is the command to run.')
+  .action(async (opts: { json?: boolean }) => {
+    if (opts.json || globalFlags.json) return run(async () => ({ data: await checkNow(), meta: {} }), { json: true })
+    const result = await checkNow()
+    console.log(result.latest === null
+      ? `amentoi-cli ${result.current} (latest release unknown: GitHub unreachable)`
+      : result.updateAvailable
+        ? `amentoi-cli ${result.current}: update available to ${result.latest}\nRun: ${result.command}`
+        : `amentoi-cli ${result.current}: up to date`)
+  })
+
+startPassiveCheck()
 
 for (const command of [authCommand, configCommand, workspacesResource, pagesResource, blocksResource, formsResource, submissionsResource, peopleResource, connectionsResource, mailResource, toolsResource, apiResource]) {
   program.addCommand(command)

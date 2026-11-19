@@ -7,7 +7,7 @@ An [api2cli](https://api2cli.dev/docs/create-cli) scaffold adapted for the Amen 
 [Bun](https://bun.sh/) is required for the api2cli binary. Download the release package:
 
 ```bash
-npm install -g https://github.com/AmenToiStack/amentoi-cli/releases/download/v0.5.0/amentoi-cli-0.5.0.tgz
+npm install -g https://github.com/AmenToiStack/amentoi-cli/releases/download/v0.5.1/amentoi-cli-0.5.1.tgz
 amentoi-cli --help
 ```
 

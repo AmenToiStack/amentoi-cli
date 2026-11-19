@@ -16,7 +16,7 @@ async function server(handler) {
 }
 
 async function run(args, env) {
-  const child = spawn('bun', [cli, ...args], { env: { ...process.env, ...env } })
+  const child = spawn('bun', [cli, ...args], { env: { ...process.env, AMENTOI_NO_UPDATE_CHECK: '1', ...env } })
   let stdout = ''
   let stderr = ''
   child.stdout.on('data', (chunk) => { stdout += chunk })
