@@ -7,7 +7,7 @@ An [api2cli](https://api2cli.dev/docs/create-cli) scaffold adapted for the Amen 
 [Bun](https://bun.sh/) is required for the api2cli binary. Download the release package:
 
 ```bash
-npm install -g https://github.com/AmenToiStack/amentoi-cli/releases/download/v0.4.0/amentoi-cli-0.4.0.tgz
+npm install -g https://github.com/AmenToiStack/amentoi-cli/releases/download/v0.5.0/amentoi-cli-0.5.0.tgz
 amentoi-cli --help
 ```
 
@@ -55,6 +55,9 @@ amentoi-cli mail contacts list --origin PEOPLE_SYNC --basis CONSENT --tags TAG_I
 amentoi-cli mail segments list --json
 amentoi-cli mail campaigns list --view sent --json
 amentoi-cli mail campaigns report CAMPAIGN_ID --json
+amentoi-cli mail campaigns create --name "Avent" --subject "{{firstName|ami}}, bonjour" --body-file avent.md --json
+amentoi-cli mail campaigns preview CAMPAIGN_ID --html /tmp/avent.html --json
+amentoi-cli mail campaigns test CAMPAIGN_ID --to moi@exemple.fr --first-name Pierre --json
 amentoi-cli mail sources --json
 AMENTOI_USER_TOKEN=... amentoi-cli --workspace ORG_ID connections connect people mail --json
 AMENTOI_USER_TOKEN=... amentoi-cli --workspace ORG_ID connections list --json

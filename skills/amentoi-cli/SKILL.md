@@ -24,7 +24,7 @@ The shared key can omit an expiry, but remains revocable. The CLI exchanges it t
 | `forms` | `list`, `get`, `create`, `update`, `publish`, `stats`. `create` and `update` take `--send-to-people` / `--no-send-to-people` and `--respondent-tags a,b`; `get` shows a `people` block |
 | `submissions` | `list`, `get` |
 | `people` | `list`, `get`, `create`, `update`, `archive`, `restore`, `overview`, `stats`, `mail-status`, `mail-resync` |
-| `mail` | read-only: `contacts list`, `contacts get`, `tags list`, `segments list`, `segments get`, `campaigns list`, `campaigns get`, `campaigns report`, `sources` |
+| `mail` | read: `contacts list`, `contacts get`, `tags list`, `segments list`, `segments get`, `campaigns list`, `campaigns get`, `campaigns report`, `sources`; draft and test: `campaigns create`, `campaigns update`, `campaigns preview`, `campaigns test`, `campaigns test-recipients` |
 | `connections` | user session only: `list`, `connect <source> <consumer>`, `disconnect <id>`, `resync <id>` |
 | `workspaces` | `list`, `use`, `current` |
 | `tools` | `list <service>`, `call <service> <tool-name>` |
@@ -59,7 +59,25 @@ Every form sends its respondents to People by default (`settings.people.sendToPe
 
 ## Amen Mail
 
-`mail` is read-only. Contacts show tags, origin (`PEOPLE_SYNC`, `CORE_SYNC`, `MANUAL`, `CSV_IMPORT`, `CAPTURE`, `API`) and legal basis (`CONSENT`, `LEGITIMATE_INTEREST`, `NONE`). `mail contacts list --tags` takes tag IDs, comma separated; get them from `mail tags list`. Tags mirrored from People are marked `system`. `mail sources` returns `null` outside the Mail audience workspace. Reads need `mail.audience.read`, `mail.segment.read` or `mail.campaign.read` on the key. There is no command to send, schedule, edit, import or export.
+Contacts show tags, origin (`PEOPLE_SYNC`, `CORE_SYNC`, `MANUAL`, `CSV_IMPORT`, `CAPTURE`, `API`) and legal basis (`CONSENT`, `LEGITIMATE_INTEREST`, `NONE`). `mail contacts list --tags` takes tag IDs, comma separated; get them from `mail tags list`. Tags mirrored from People are marked `system`. `mail sources` returns `null` outside the Mail audience workspace. Reads need `mail.audience.read`, `mail.segment.read` or `mail.campaign.read` on the key.
+
+### Writing a campaign and testing it
+
+Merge tags (`{{firstName}}`, `{{firstName|ami}}`, `{{lastName}}`, `{{email}}`, custom field keys) are substituted **only by Amen Mail**. Never test a campaign by sending its text through Gmail or another mailbox: the reader sees the raw `{{...}}`. Test through Amen Mail:
+
+```bash
+amentoi-cli mail campaigns create --name "Avent 2026" --subject "{{firstName|Bonjour}}, l'Avent commence" --preview-text "..." --body-file avent.md --json
+amentoi-cli mail campaigns preview CAMPAIGN_ID --html /tmp/avent.html --json   # recipients count + meta.unresolvedTags
+amentoi-cli mail campaigns test-recipients --json                               # allowed test addresses and domains
+amentoi-cli mail campaigns test CAMPAIGN_ID --to moi@exemple.fr --first-name Pierre --var paroisse="Saint-Jean" --json
+amentoi-cli mail campaigns update CAMPAIGN_ID --body-file avent.md --json       # an edit calls for a new test
+```
+
+- `--body-file` is Markdown (`bodyMarkdown`); `--content-file` is a block document as the console editor stores it.
+- `preview` renders with sample values (Marie Dupont) and returns `recipients` (`eligible` is the number who will receive it). Report that number to the user; never guess it. `meta.unresolvedTags` non-empty means a tag the reader would see raw.
+- `test` renders exactly as the send: snippets, organisation theme, and the values of the contact with that address when one exists. Subject prefixed `[TEST]`. Outside production only the test domains are accepted.
+- These need `mail.campaign.write` (drafting, tests) or `mail.campaign.read` (preview). A 403 means the key lacks the scope: ask the user for a key with it, do not fall back to a hand-sent email.
+- There is no command to send, schedule, delete, import or export. The send to the audience stays a gesture in the console, after a test of the current content.
 
 ## What a key can and cannot do
 
