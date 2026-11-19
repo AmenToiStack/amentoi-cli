@@ -256,7 +256,7 @@ test('mail read commands use the mail key session and the exact routes', async (
     }
     const productPaths = s.productRequests().map((item) => `${item.method} ${item.path}`)
     assert.equal(productPaths.length, calls.length)
-    assert.ok(productPaths.every((line) => line.startsWith('GET ')), 'mail commands are read-only')
+    assert.ok(productPaths.every((line) => line.startsWith('GET ')), 'mail read commands only read')
     const first = new URL(`http://x${s.productRequests()[0].path}`)
     assert.equal(first.pathname, '/v1/contacts')
     assert.deepEqual(Object.fromEntries(first.searchParams), {
@@ -265,6 +265,35 @@ test('mail read commands use the mail key session and the exact routes', async (
     assert.deepEqual(productPaths.slice(1), calls.slice(1).map(([, path]) => `GET ${path}`))
     assert.ok(s.requests.filter((item) => item.on === 'core').every((item) => item.path === '/v1/products/mail/key-session' && item.key === key))
     assert.ok(s.productRequests().every((item) => item.bearer === 'Bearer short-token'))
+  } finally { s.close() }
+})
+
+test('mail campaigns create, test and preview go through Amen Mail, never send', async () => {
+  const s = await stack((request) => {
+    if (request.url.split('?')[0].endsWith('/preview')) return { data: { subject: 'Bonjour Marie', html: '<p>Bonjour Marie</p>', text: 'Bonjour Marie {{paroise}}', links: [], recipients: { eligible: 42 } }, meta: {} }
+    if (request.method === 'POST' && request.url === '/v1/campaigns') return { data: { id: 'k-9' }, meta: {} }
+    return { data: { id: 'k-9' }, meta: {} }
+  })
+  try {
+    const created = await run(['mail', 'campaigns', 'create', '--name', 'Avent', '--subject', '{{firstName|ami}}, bienvenue', '--json'], s.env)
+    assert.equal(created.code, 0, created.stderr)
+    const tested = await run(['mail', 'campaigns', 'test', 'k-9', '--to', 'moi@example.com', '--first-name', 'Pierre', '--var', 'paroisse=Saint-Jean', '--json'], s.env)
+    assert.equal(tested.code, 0, tested.stderr)
+    const previewed = await run(['mail', 'campaigns', 'preview', 'k-9', '--json'], s.env)
+    assert.equal(previewed.code, 0, previewed.stderr)
+    const preview = JSON.parse(previewed.stdout)
+    assert.deepEqual(preview.data.recipients, { eligible: 42 })
+    assert.deepEqual(preview.meta.unresolvedTags, ['{{paroise}}'])
+    const missingName = await run(['mail', 'campaigns', 'create', '--subject', 'x', '--json'], s.env)
+    assert.notEqual(missingName.code, 0)
+
+    const sent = s.productRequests().map((item) => ({ method: item.method, path: item.path.split('?')[0], body: item.body }))
+    assert.deepEqual(sent, [
+      { method: 'POST', path: '/v1/campaigns', body: { name: 'Avent', subject: '{{firstName|ami}}, bienvenue', purpose: 'newsletter' } },
+      { method: 'POST', path: '/v1/campaigns/k-9/test', body: { to: 'moi@example.com', locale: 'fr-FR', firstName: 'Pierre', variables: { paroisse: 'Saint-Jean' } } },
+      { method: 'GET', path: '/v1/campaigns/k-9/preview', body: undefined },
+    ])
+    assert.ok(!sent.some((item) => /\/(send|schedule)$/.test(item.path)), 'no audience send from the CLI')
   } finally { s.close() }
 })
 
@@ -297,10 +326,13 @@ test('help does not offer what API keys are forbidden to do', async () => {
   const mailHelp = await run(['mail', '--help'], {})
   assert.equal(mailHelp.code, 0)
   assert.match(mailHelp.stdout, /mail\.integration\.write is forbidden to API keys/)
-  for (const group of ['contacts', 'tags', 'segments', 'campaigns']) {
+  for (const group of ['contacts', 'tags', 'segments']) {
     const help = await run(['mail', group, '--help'], {})
     assert.doesNotMatch(help.stdout, /^\s+(create|update|delete|send|schedule|merge|import|export|integration|relay)\b/m, `${group} stays read-only`)
   }
+  // Campaigns may be drafted and tested; leaving for the audience stays a console gesture.
+  const campaignsHelp = await run(['mail', 'campaigns', '--help'], {})
+  assert.doesNotMatch(campaignsHelp.stdout, /^\s+(delete|send|schedule|launch|merge|import|export|integration|relay)\b/m, 'campaigns never send')
   for (const args of [['mail', 'integration'], ['mail', 'relay'], ['mail', 'campaigns', 'send', 'x'], ['people', 'optout'], ['people', 'integration']]) {
     const result = await run(args, {})
     assert.notEqual(result.code, 0, `${args.join(' ')} must not exist`)

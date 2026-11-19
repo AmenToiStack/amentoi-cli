@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.5.0
+
+- Add `mail campaigns create|update|preview|test|test-recipients`: draft a campaign, render it with its recipient count (`meta.unresolvedTags` flags any merge tag left raw), and send a test through Amen Mail with `--first-name` and repeatable `--var key=value`. Merge tags are only substituted by Amen Mail; a campaign tested by hand through another mailbox shows them raw. Needs `mail.campaign.write`. Sending or scheduling to the audience is still not offered.
+
 ## 0.4.0
 
 - Add `connections list|connect|disconnect|resync` for Core product connections (people -> mail, forms -> people, forms -> link, store -> link). These Core routes act for a signed-in user: set `AMENTOI_USER_TOKEN`; a workspace API key is refused and the CLI says so without sending anything.

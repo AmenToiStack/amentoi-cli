@@ -17,7 +17,7 @@ import { mailResource } from './resources/mail.js'
 const program = new Command()
 program.name('amentoi-cli')
   .description('Amen Toi services with one API key, limited by workspace permissions and product rights')
-  .version('0.4.0')
+  .version('0.5.0')
   .option('--json', 'JSON envelope for agents')
   .option('--format <fmt>', 'text, json, csv, or yaml', 'text')
   .option('--verbose', 'Show debug diagnostics')
