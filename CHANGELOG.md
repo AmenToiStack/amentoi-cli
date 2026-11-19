@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.5.1
+
+- Add `amentoi-cli version [--json]`: the installed version, the latest GitHub release, `updateAvailable`, and the command that updates this install (`api2cli install AmenToiStack/amentoi-cli --force` for an api2cli install, else `npm install -g <release tgz>`).
+- Once a day at most, the CLI checks the latest release in the background and, when a newer one exists, prints one line on stderr (stdout and `--json` stay clean). `AMENTOI_NO_UPDATE_CHECK=1` or `CI=true` turns it off.
+
 ## 0.5.0
 
 - Add `mail campaigns create|update|preview|test|test-recipients`: draft a campaign, render it with its recipient count (`meta.unresolvedTags` flags any merge tag left raw), and send a test through Amen Mail with `--first-name` and repeatable `--var key=value`. Merge tags are only substituted by Amen Mail; a campaign tested by hand through another mailbox shows them raw. Needs `mail.campaign.write`. Sending or scheduling to the audience is still not offered.

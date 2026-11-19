@@ -20,7 +20,7 @@ async function server(handler) {
 }
 
 async function run(args, env) {
-  const base = { ...process.env, AMENTOI_CONFIG: join(tmpdir(), 'amentoi-test-missing', 'cli.json') }
+  const base = { ...process.env, AMENTOI_NO_UPDATE_CHECK: '1', AMENTOI_CONFIG: join(tmpdir(), 'amentoi-test-missing', 'cli.json') }
   for (const name of ['AMENTOI_USER_TOKEN', 'AMENTOI_MAIL_URL', 'AMENTOI_WORKSPACE_ID']) delete base[name]
   const child = spawn('bun', [cli, ...args], { env: { ...base, ...env } })
   let stdout = ''

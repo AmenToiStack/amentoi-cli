@@ -1,6 +1,6 @@
 {
   "name": "amentoi-cli",
-  "version": "0.5.0",
+  "version": "0.5.1",
   "description": "api2cli-based CLI for Amen Toi services with one account API key",
   "type": "module",
   "bin": { "amentoi-cli": "./dist/index.js", "amentoi": "./bin/amentoi.js" },
