@@ -40,7 +40,7 @@ Examples:
 amentoi-cli pages list --json
 amentoi-cli pages create --slug mon-profil --title 'Mon profil' --json
 amentoi-cli blocks create PAGE_ID --type LINK --data '{"url":"https://example.com","label":"Site"}' --json
-amentoi-cli pages stats PAGE_ID --days 30 --json
+amentoi-cli pages stats PAGE_ID --days 30 --json   # PAGE_ID or the page slug
 amentoi-cli forms create --file form.json --respondent-tags membre,2026 --json
 amentoi-cli forms update FORM_ID --no-send-to-people --json
 amentoi-cli forms get FORM_ID --json

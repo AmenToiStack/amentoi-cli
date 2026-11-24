@@ -42,6 +42,7 @@ amentoi-cli blocks image PAGE_ID --url https://example.com/image.png --output pr
 amentoi-cli blocks thumbnail PAGE_ID BLOCK_ID --file preview.webp --json
 amentoi-cli pages publish PAGE_ID --json
 amentoi-cli pages stats PAGE_ID --days 30 --json
+amentoi-cli pages stats catho_preneur --days 7   # a slug works wherever PAGE_ID does
 amentoi-cli forms create --file form.json --json
 amentoi-cli forms publish FORM_ID --json
 amentoi-cli submissions list FORM_ID --limit 50 --json

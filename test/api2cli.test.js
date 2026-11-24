@@ -104,3 +104,38 @@ test('one account key selects two workspaces and three product services', async 
     product.instance.close()
   }
 })
+
+test('pages stats resolves a slug to the page uuid before calling the stats endpoint', async () => {
+  const pageId = '01a0ae3c-6df4-70bc-b104-032defd2b01b'
+  const paths = []
+  const core = await server((_request, response) => {
+    response.setHeader('content-type', 'application/json')
+    response.end(JSON.stringify({ data: { token: 'short-link-token' }, meta: {} }))
+  })
+  const link = await server((request, response) => {
+    paths.push(request.url)
+    response.setHeader('content-type', 'application/json')
+    response.end(JSON.stringify(request.url === '/v1/link/pages'
+      ? { data: [{ id: 'other', slug: 'pierrelouis_catho' }, { id: pageId, slug: 'catho_preneur' }] }
+      : { data: { views: 3 }, meta: { measured: true } }))
+  })
+  try {
+    const env = { AMENTOI_API_KEY: key, AMENTOI_CORE_URL: core.url, AMENTOI_LINK_URL: link.url }
+    const bySlug = await run(['pages', 'stats', 'catho_preneur', '--days', '7', '--json'], env)
+    assert.equal(bySlug.code, 0, bySlug.stderr)
+    assert.deepEqual(JSON.parse(bySlug.stdout).data, { views: 3 })
+    assert.deepEqual(paths, ['/v1/link/pages', `/v1/link/pages/${pageId}/stats?days=7`])
+
+    paths.length = 0
+    const byId = await run(['pages', 'stats', pageId, '--json'], env)
+    assert.equal(byId.code, 0, byId.stderr)
+    assert.deepEqual(paths, [`/v1/link/pages/${pageId}/stats`])
+
+    const unknown = await run(['pages', 'stats', 'nobody', '--json'], env)
+    assert.notEqual(unknown.code, 0)
+    assert.match(JSON.parse(unknown.stderr).error.message, /No page with slug "nobody"/)
+  } finally {
+    core.instance.close()
+    link.instance.close()
+  }
+})
